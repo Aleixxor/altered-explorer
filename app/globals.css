@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 196 94% 43%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 270 60% 42%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 196 94% 43%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-altered-darker text-foreground;
+    background-image: radial-gradient(circle at 25% 25%, rgba(6, 182, 212, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .altered-card {
+    @apply relative overflow-hidden rounded-lg border border-altered-blue/50 bg-altered-dark/80 backdrop-blur-sm transition-all;
+  }
+
+  .altered-card:hover {
+    @apply border-altered-cyan/70 shadow-md shadow-altered-cyan/20;
+  }
+
+  .altered-glow {
+    @apply after:absolute after:inset-0 after:rounded-lg after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-100;
+    @apply after:bg-gradient-to-br after:from-altered-cyan/10 after:to-altered-green/10;
+  }
+
+  .altered-header {
+    @apply relative overflow-hidden rounded-t-lg border-b border-altered-blue/50 bg-gradient-to-r from-altered-blue/30 to-altered-purple/30 p-4;
+  }
+
+  .altered-title {
+    @apply bg-gradient-to-r from-altered-cyan to-altered-green bg-clip-text text-transparent;
+  }
+
+  .altered-button {
+    @apply bg-gradient-to-r from-altered-blue to-altered-purple hover:from-altered-cyan hover:to-altered-green text-white transition-all duration-300;
+  }
+
+  .altered-input {
+    @apply bg-altered-darker/80 border-altered-blue/50 focus:border-altered-cyan/70 focus:ring-altered-cyan/30;
+  }
+
+  .altered-select {
+    @apply bg-altered-darker/80 border-altered-blue/50;
+  }
+
+  .altered-tab {
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-altered-blue/80 data-[state=active]:to-altered-purple/80 data-[state=active]:text-white;
+  }
+
+  .altered-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4;
+  }
+}
+
