@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { CardDetailsModal } from "@/components/card-details-modal"
-import { Loader2, Search, FilterX, ChevronUp, ArrowDownAZ, ArrowDownZa, ArrowDownZA } from "lucide-react"
+import { Loader2, Search, FilterX, ChevronUp, ArrowDownAZ, ArrowDownZa, ArrowDownZA, ArrowUpZA } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import cards from "@/public/all_card_details.json"
 import { CardRarities } from "@/lib/cardRarities.enum"
@@ -384,8 +384,7 @@ export function CardList() {
               variant="outline"
               className="border-altered-blue/50 hover:bg-altered-blue/20 hover:text-altered-cyan"
             >
-              {order === "asc" ? <ArrowDownAZ /> : <ArrowDownZA />}
-              {order === "asc" ? "Ascending" : "Descending"}
+              {order === "asc" ? <ArrowDownAZ /> : <ArrowUpZA />}
             </Button>
           </div>
         </div>
