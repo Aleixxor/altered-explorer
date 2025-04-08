@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Info, Zap, Copy } from "lucide-react"
 import { CardFactions } from "@/lib/cardFactions.enum"
+import { CardRarities } from "@/lib/cardRarities.enum"
 
 interface CardData {
   mainFaction: string
@@ -82,25 +82,7 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
           interactingCards.push(...keywordMatches)
         }
 
-        // 3. Cards from the same set that complement this card's type
-        if (card.cardType === "Personagem") {
-          // For character cards, find support cards or equipment
-          const supportCards = otherCards.filter(
-            (c) =>
-              (c.cardType === "Suporte" || c.cardType === "Equipamento") &&
-              c.cardSet === card.cardSet &&
-              !interactingCards.includes(c),
-          )
-          interactingCards.push(...supportCards)
-        } else if (card.cardType === "Suporte" || card.cardType === "Equipamento") {
-          // For support/equipment cards, find character cards they could support
-          const characterCards = otherCards.filter(
-            (c) => c.cardType === "Personagem" && c.cardSet === card.cardSet && !interactingCards.includes(c),
-          )
-          interactingCards.push(...characterCards)
-        }
-
-        // 4. Cards with matching subtypes that often work well together
+        // 3. Cards with matching subtypes that often work well together
         if (card.cardSubTypes) {
           const subtypeMatches = otherCards.filter(
             (c) =>
@@ -111,7 +93,7 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
           interactingCards.push(...subtypeMatches)
         }
 
-        // 5. Cards with complementary power types
+        // 4. Cards with complementary power types
         if (card.oceanPower && Number.parseInt(card.oceanPower) > 0) {
           const oceanCards = otherCards.filter(
             (c) => c.oceanPower && Number.parseInt(c.oceanPower) > 0 && !interactingCards.includes(c),
@@ -179,6 +161,8 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
       "reduce",
       "increase",
       "double",
+      "create",
+      "token",
     ]
 
     // Extract words that match our potential keywords
@@ -327,101 +311,99 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
           </TabsContent>
 
           <TabsContent value="related">
-            <ScrollArea className="h-[400px] py-4">
-              {relatedCards.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="text-sm text-altered-light/70 mb-2">
-                    These cards from the <span className="text-altered-cyan">{card.mainFaction}</span> faction have good
-                    synergy with <span className="text-altered-cyan">{card.name}</span>:
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {relatedCards.map((relatedCard) => (
-                      <div
-                        key={relatedCard.reference}
-                        className="altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105"
-                        onClick={() => selectCard(relatedCard)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            selectCard(relatedCard);
-                          }
-                        }}
-                      >
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
-                          <img
-                            src={relatedCard.imagePath || "/placeholder.svg"}
-                            alt={relatedCard.name}
-                            className="object-cover w-full h-full"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-altered-darker/80 to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                            <div className="absolute bottom-0 left-0 right-0 p-2">
-                              <p className="text-xs text-altered-light/90 line-clamp-3">{relatedCard.mainEffect}</p>
-                            </div>
+            {relatedCards.length > 0 ? (
+              <div className="space-y-4">
+                <div className="text-sm text-altered-light/70 mb-2">
+                  These cards from the <span className="text-altered-cyan">{card.mainFaction}</span> faction have good
+                  synergy with <span className="text-altered-cyan">{card.name}</span>:
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {relatedCards.map((relatedCard) => (
+                    <div
+                      key={relatedCard.reference}
+                      className={`altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105 
+                          ${relatedCard.rarity == CardRarities.Rare ? "shadow-lg shadow-altered-cyan/50" : ""}`}
+                      onClick={() => selectCard(relatedCard)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          selectCard(relatedCard);
+                        }
+                      }}
+                    >
+                      <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
+                        <img
+                          src={relatedCard.imagePath || "/placeholder.svg"}
+                          alt={relatedCard.name}
+                          className="object-cover w-full h-full"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-altered-darker/80 to-transparent opacity-0 hover:opacity-100 transition-opacity">
+                          <div className="absolute bottom-0 left-0 right-0 p-2">
+                            <p className="text-xs text-altered-light/90 line-clamp-3">{relatedCard.mainEffect}</p>
                           </div>
                         </div>
-                        <div className="p-2 bg-gradient-to-r from-altered-blue/30 to-altered-purple/30 rounded-b-lg">
-                          <p className="text-xs font-medium truncate text-altered-light">{relatedCard.name}</p>
-                          <p className="text-xs text-altered-light/70 truncate">
-                            {relatedCard.mainFaction} • {relatedCard.cardType}
-                          </p>
-                          {relatedCard.cardSubTypes && (
-                            <p className="text-[10px] text-altered-light/50 truncate">{relatedCard.cardSubTypes}</p>
-                          )}
-                        </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="p-2 bg-gradient-to-r from-altered-blue/30 to-altered-purple/30 rounded-b-lg">
+                        <p className="text-xs font-medium truncate text-altered-light">{relatedCard.name}</p>
+                        <p className="text-xs text-altered-light/70 truncate">
+                          {relatedCard.mainFaction} • {relatedCard.cardType}
+                        </p>
+                        {relatedCard.cardSubTypes && (
+                          <p className="text-[10px] text-altered-light/50 truncate">{relatedCard.cardSubTypes}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="text-center py-12 text-altered-light/50">
-                  No synergy cards found in the {card.mainFaction} faction.
-                </div>
-              )}
-            </ScrollArea>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-altered-light/50">
+                No synergy cards found in the {card.mainFaction} faction.
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="versions">
-            <ScrollArea className="h-[400px] py-4">
-              {sameNameCards.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="text-sm text-altered-light/70 mb-2">
-                    Other versions of <span className="text-altered-cyan">{card.name}</span> from different sets:
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {sameNameCards.map((versionCard) => (
-                      <div
-                        key={versionCard.reference}
-                        className="altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105"
-                        onClick={() => selectCard(versionCard)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            selectCard(versionCard);
-                          }
-                        }}
-                      >
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
-                          <img
-                            src={versionCard.imagePath || "/placeholder.svg"}
-                            alt={versionCard.name}
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                        <div className="p-2 bg-gradient-to-r from-altered-blue/30 to-altered-purple/30 rounded-b-lg">
-                          <p className="text-xs font-medium truncate text-altered-light">{versionCard.name}</p>
-                          <p className="text-xs text-altered-light/70 truncate">{versionCard.cardSet}</p>
-                          <p className="text-[10px] text-altered-light/50 truncate">{versionCard.rarity}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            {sameNameCards.length > 0 ? (
+              <div className="space-y-4">
+                <div className="text-sm text-altered-light/70 mb-2">
+                  Other versions of <span className="text-altered-cyan">{card.name}</span> from different sets:
                 </div>
-              ) : (
-                <div className="text-center py-12 text-altered-light/50">No other versions of this card found.</div>
-              )}
-            </ScrollArea>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {sameNameCards.map((versionCard) => (
+                    <div
+                      key={versionCard.reference}
+                      className={`altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105 
+                          ${versionCard.rarity == CardRarities.Rare ? "shadow-lg shadow-altered-cyan/50" : ""}`}
+                      onClick={() => selectCard(versionCard)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          selectCard(versionCard);
+                        }
+                      }}
+                    >
+                      <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
+                        <img
+                          src={versionCard.imagePath || "/placeholder.svg"}
+                          alt={versionCard.name}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                      <div className="p-2 bg-gradient-to-r from-altered-blue/30 to-altered-purple/30 rounded-b-lg">
+                        <p className="text-xs font-medium truncate text-altered-light">{versionCard.name}</p>
+                        <p className="text-xs text-altered-light/70 truncate">{versionCard.cardSet}</p>
+                        <p className="text-[10px] text-altered-light/50 truncate">{versionCard.rarity}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-altered-light/50">No other versions of this card found.</div>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>

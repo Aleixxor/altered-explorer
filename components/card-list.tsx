@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { CardDetailsModal } from "@/components/card-details-modal"
-import { Loader2, Search, FilterX } from "lucide-react"
+import { Loader2, Search, FilterX, ChevronUp, ArrowDownAZ, ArrowDownZa, ArrowDownZA } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import cards from "@/public/all_card_details.json"
+import { CardRarities } from "@/lib/cardRarities.enum"
 
 interface CardData {
   mainFaction: string
@@ -48,6 +49,23 @@ export function CardList() {
   const [rarities, setRarities] = useState<string[]>([])
   const [cardTypes, setCardTypes] = useState<string[]>([])
   const [cardSets, setCardSets] = useState<string[]>([])
+
+  const [orderBy, setOrderBy] = useState<keyof CardData>("name")
+
+  const [order, setOrder] = useState<"asc" | "desc">("asc")
+
+  const orderByOptions = [
+    { name: "name", description: "Name" },
+    { name: "rarity", description: "Rarity" },
+    { name: "mainCost", description: "Main Cost" },
+    { name: "recallCost", description: "Recall Cost" },
+    { name: "oceanPower", description: "Ocean Power" },
+    { name: "forestPower", description: "Forest Power" },
+    { name: "mountainPower", description: "Mountain Power" },
+  ];
+
+  // State for showing "Go to top" button
+  const [showGoToTopButton, setShowGoToTopButton] = useState(false)
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -150,6 +168,49 @@ export function CardList() {
       window.removeEventListener("openCard", handleOpenCard as EventListener)
     }
   }, [cards])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setShowGoToTopButton(true)
+      } else {
+        setShowGoToTopButton(false)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+
+    // Cleanup on component unmount
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const sortCards = () => {
+    return filteredCards.toSorted((a, b) => {
+      // Verifica se o valor da propriedade é um número
+      if (typeof a[orderBy] === 'number' && typeof b[orderBy] === 'number') {
+        return order === "asc"
+          ? a[orderBy] - b[orderBy]
+          : b[orderBy] - a[orderBy]; // Ordenação descendente
+      }
+
+      // Verifica se o valor da propriedade é uma string
+      if (typeof a[orderBy] === 'string' && typeof b[orderBy] === 'string') {
+        return order === "asc"
+          ? a[orderBy].localeCompare(b[orderBy]) // Ordem alfabética ascendente
+          : b[orderBy].localeCompare(a[orderBy]); // Ordem alfabética descendente
+      }
+
+      return 0; // Se não for número nem string, não há comparação
+    });
+  };
+
 
   if (loading) {
     return (
@@ -303,16 +364,40 @@ export function CardList() {
       </div>
 
       <div className="altered-card p-4">
-        <div className="altered-header mb-4">
+        <div className="altered-header mb-4 flex justify-between items-center">
           <h2 className="text-xl font-bold altered-title">Results</h2>
+          <div className="flex items-center space-x-2">
+            <Select value={orderBy} onValueChange={setOrderBy}>
+              <SelectTrigger className="altered-select">
+                <SelectValue placeholder="Order by" />
+              </SelectTrigger>
+              <SelectContent className="bg-altered-dark border-altered-blue/50">
+                {orderByOptions.map((option) => (
+                  <SelectItem key={option.name} value={option.name}>
+                    {option.description}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setOrder(order === "asc" ? "desc" : "asc")}
+              variant="outline"
+              className="border-altered-blue/50 hover:bg-altered-blue/20 hover:text-altered-cyan"
+            >
+              {order === "asc" ? <ArrowDownAZ /> : <ArrowDownZA />}
+              {order === "asc" ? "Ascending" : "Descending"}
+            </Button>
+          </div>
         </div>
 
         {filteredCards.length > 0 ? (
           <div className="altered-grid">
-            {filteredCards.map((card) => (
+            {sortCards().map((card) => (
               <div
                 key={card.reference}
-                className="altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105 hover:animate-pulse-border"
+                className={`altered-card altered-glow cursor-pointer 
+                  transition-all duration-300 hover:scale-105 hover:animate-pulse-border 
+                  ${card.rarity == CardRarities.Rare ? "shadow-lg shadow-altered-cyan/50" : ""}`}
                 onClick={() => handleCardClick(card)}
                 role="button"
                 tabIndex={0}
@@ -342,16 +427,28 @@ export function CardList() {
         )}
       </div>
 
-      {selectedCard && (
-        <CardDetailsModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          card={selectedCard}
-          handleCardClick={handleCardClick}
-          allCards={cards}
-        />
+      {/* "Go to top" button */}
+      {showGoToTopButton && (
+        <Button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 bg-altered-blue/50 shadow-md shadow-altered-cyan/50 hover:bg-altered-cyan text-white rounded-full p-3"
+        >
+          <ChevronUp className="h-6 w-6" />
+        </Button>
       )}
-    </div>
+
+      {
+        selectedCard && (
+          <CardDetailsModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            card={selectedCard}
+            handleCardClick={handleCardClick}
+            allCards={cards}
+          />
+        )
+      }
+    </div >
   )
 }
 
