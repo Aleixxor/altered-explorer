@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { CardDetailsModal } from "@/components/card-details-modal"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2, Search, FilterX } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import cards from "@/public/all_card_details.json"
@@ -315,6 +314,13 @@ export function CardList() {
                 key={card.reference}
                 className="altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105 hover:animate-pulse-border"
                 onClick={() => handleCardClick(card)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleCardClick(card);
+                  }
+                }}
               >
                 <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
                   <img

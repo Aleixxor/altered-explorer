@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Info, Zap, Copy } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { CardFactions } from "@/lib/cardFactions.enum"
 
 interface CardData {
@@ -36,10 +35,9 @@ interface CardDetailsModalProps {
   handleCardClick: (card: CardData) => void
 }
 
-export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardClick }: CardDetailsModalProps) {
+export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardClick }: Readonly<CardDetailsModalProps>) {
   const [relatedCards, setRelatedCards] = useState<CardData[]>([])
   const [sameNameCards, setSameNameCards] = useState<CardData[]>([])
-  const { toast } = useToast()
   const [isModalOpen, setIsModalOpen] = useState(isOpen)
 
   useEffect(() => {
@@ -65,8 +63,8 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
         // 1. Cards that explicitly mention this card's name in their effects
         const nameMatches = otherCards.filter(
           (c) =>
-            (c.mainEffect && c.mainEffect.toLowerCase().includes(card.name.toLowerCase())) ||
-            (c.echoEffect && c.echoEffect.toLowerCase().includes(card.name.toLowerCase())),
+            (c.mainEffect?.toLowerCase().includes(card.name?.toLowerCase())) ||
+            (c.echoEffect?.toLowerCase().includes(card.name?.toLowerCase())),
         )
         interactingCards.push(...nameMatches)
 
@@ -342,6 +340,13 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
                         key={relatedCard.reference}
                         className="altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105"
                         onClick={() => selectCard(relatedCard)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            selectCard(relatedCard);
+                          }
+                        }}
                       >
                         <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
                           <img
@@ -389,6 +394,13 @@ export function CardDetailsModal({ isOpen, onClose, card, allCards, handleCardCl
                         key={versionCard.reference}
                         className="altered-card altered-glow cursor-pointer transition-all duration-300 hover:scale-105"
                         onClick={() => selectCard(versionCard)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            selectCard(versionCard);
+                          }
+                        }}
                       >
                         <div className="aspect-[2/3] relative overflow-hidden rounded-t-lg">
                           <img
