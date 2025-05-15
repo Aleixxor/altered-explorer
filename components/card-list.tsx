@@ -193,18 +193,24 @@ export function CardList() {
 
   const sortCards = () => {
     return filteredCards.toSorted((a, b) => {
+      const aValue = a[orderBy].replaceAll("#", "");
+      const bValue = b[orderBy].replaceAll("#", "");
+
+      const aNumber = parseFloat(aValue);
+      const bNumber = parseFloat(bValue);
+
       // Verifica se o valor da propriedade é um número
-      if (typeof a[orderBy] === 'number' && typeof b[orderBy] === 'number') {
+      if (aNumber && bNumber) {
         return order === "asc"
-          ? a[orderBy] - b[orderBy]
-          : b[orderBy] - a[orderBy]; // Ordenação descendente
+          ? aNumber - bNumber
+          : bNumber - aNumber; // Ordenação descendente
       }
 
       // Verifica se o valor da propriedade é uma string
-      if (typeof a[orderBy] === 'string' && typeof b[orderBy] === 'string') {
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
         return order === "asc"
-          ? a[orderBy].localeCompare(b[orderBy]) // Ordem alfabética ascendente
-          : b[orderBy].localeCompare(a[orderBy]); // Ordem alfabética descendente
+          ? aValue.localeCompare(bValue) // Ordem alfabética ascendente
+          : bValue.localeCompare(aValue); // Ordem alfabética descendente
       }
 
       return 0; // Se não for número nem string, não há comparação
@@ -367,7 +373,7 @@ export function CardList() {
         <div className="altered-header mb-4 flex justify-between items-center">
           <h2 className="text-xl font-bold altered-title">Results</h2>
           <div className="flex items-center space-x-2">
-            <Select value={orderBy} onValueChange={setOrderBy}>
+            <Select value={orderBy} onValueChange={(value) => setOrderBy(value as keyof CardData)}>
               <SelectTrigger className="altered-select">
                 <SelectValue placeholder="Order by" />
               </SelectTrigger>
