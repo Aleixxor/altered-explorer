@@ -6,6 +6,7 @@ import { Space_Grotesk } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect, useState } from "react"
+import { Head } from "next/document"
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -34,7 +35,10 @@ export default function RootLayout({
     <html lang="en">
       <head
         title="Altered TCG Explorer"
-      />
+      >
+        <title>Altered TCG Explorer</title>
+        <link rel="icon" href="/favicon.png" />
+      </head>
       <body className={spaceGrotesk.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           {children}
@@ -44,7 +48,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'
