@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { CardDetailsModal } from "@/components/card-details-modal"
-import { Loader2, Search, FilterX, ChevronUp, ArrowDownAZ, ArrowDownZa, ArrowDownZA, ArrowUpZA } from "lucide-react"
+import { Loader2, Search, FilterX, ChevronUp, ArrowDownAZ, Copy, ArrowUpZA, Check } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import cards from "@/public/all_card_details.json"
 import { CardRarities } from "@/lib/cardRarities.enum"
+import { toast } from "./ui/use-toast"
+import { Tooltip, TooltipProvider } from "./ui/tooltip"
 
 interface CardData {
   mainFaction: string
@@ -51,8 +53,9 @@ export function CardList() {
   const [cardSets, setCardSets] = useState<string[]>([])
 
   const [orderBy, setOrderBy] = useState<keyof CardData>("name")
-
   const [order, setOrder] = useState<"asc" | "desc">("asc")
+
+  const [copied, setCopied] = useState(false)
 
   const orderByOptions = [
     { name: "name", description: "Name" },
@@ -70,7 +73,8 @@ export function CardList() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        setFilteredCards(cards)
+        let orderedCards = cards.sort((a: CardData, b: CardData) => a.name.localeCompare(b.name))
+        setFilteredCards(orderedCards);
 
         // Extract unique values for filters
         setFactions([...new Set(cards.map((card: CardData) => card.mainFaction))] as string[])
@@ -191,10 +195,10 @@ export function CardList() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const sortCards = () => {
+  const sortCards = (orderByField: keyof CardData) => {
     return filteredCards.toSorted((a, b) => {
-      const aValue = a[orderBy].replaceAll("#", "");
-      const bValue = b[orderBy].replaceAll("#", "");
+      const aValue = a[orderByField].replaceAll("#", "");
+      const bValue = b[orderByField].replaceAll("#", "");
 
       const aNumber = parseFloat(aValue);
       const bNumber = parseFloat(bValue);
@@ -217,6 +221,26 @@ export function CardList() {
     });
   };
 
+  const copyJson = () => {
+    const jsonString = JSON.stringify(filteredCards, null, 2);
+    navigator.clipboard.writeText(jsonString).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "The search result has been copied to your clipboard.",
+        variant: "destructive",
+      });
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    }).catch((err) => {
+      toast({
+        title: "Error",
+        description: "Failed to copy JSON.",
+        variant: "destructive",
+      });
+    });
+  }
 
   if (loading) {
     return (
@@ -392,12 +416,19 @@ export function CardList() {
             >
               {order === "asc" ? <ArrowDownAZ /> : <ArrowUpZA />}
             </Button>
+            <Button
+              onClick={() => copyJson()}
+              variant="outline"
+              className="border-altered-blue/50 hover:bg-altered-blue/20 hover:text-altered-cyan"
+            >
+              {copied ? <Check /> : <Copy />}
+            </Button>
           </div>
         </div>
 
         {filteredCards.length > 0 ? (
           <div className="altered-grid">
-            {sortCards().map((card) => (
+            {sortCards(orderBy).map((card) => (
               <div
                 key={card.reference}
                 className={`altered-card altered-glow cursor-pointer 
@@ -422,7 +453,10 @@ export function CardList() {
                 </div>
                 <div className="p-2 bg-gradient-to-r from-altered-blue/30 to-altered-purple/30 rounded-b-lg">
                   <p className="text-xs font-medium truncate text-altered-light">{card.name}</p>
-                  <p className="text-xs text-altered-light/70 truncate">{card.mainFaction}</p>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="text-xs text-altered-light/70 truncate">{card.mainFaction}</p>
+                    <p className="text-xs text-altered-light/70 truncate">{card.cardType}</p>
+                  </div>
                 </div>
               </div>
             ))}
