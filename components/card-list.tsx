@@ -94,7 +94,7 @@ export function CardList() {
 
   useEffect(() => {
     // Apply filters
-    let result = cards
+    let result: CardData[] = cards
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
@@ -157,7 +157,7 @@ export function CardList() {
   // Add event listener to handle opening a card by reference
   useEffect(() => {
     const handleOpenCard = (event: CustomEvent<{ cardReference: string }>) => {
-      const cardToOpen = cards.find((card) => card.reference === event.detail.cardReference)
+      const cardToOpen = cards.find((card: CardData) => card.reference === event.detail.cardReference)
       if (cardToOpen) {
         setSelectedCard(cardToOpen)
         setIsModalOpen(true)
